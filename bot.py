@@ -209,6 +209,9 @@ II. Перспективные акции для инвестирования:
 
 client = openai.OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
+def split_message(text, max_length=4096):
+    return [text[i:i+max_length] for i in range(0, len(text), max_length)]
+
 async def send_openai_report():
     try:
         response = client.chat.completions.create(
@@ -218,7 +221,8 @@ async def send_openai_report():
             temperature=0.7,
         )
         report = response.choices[0].message.content
-        await bot.send_message(chat_id=CHAT_ID, text=report)
+        for chunk in split_message(report):
+            await bot.send_message(chat_id=CHAT_ID, text=chunk)
         print(f"Sent OpenAI report to {CHAT_ID} at {datetime.now()}")
     except Exception as e:
         print(f"Failed to send OpenAI report: {e}")
@@ -238,7 +242,8 @@ async def send_openai_report_17_00():
             temperature=0.7,
         )
         report = response.choices[0].message.content
-        await bot.send_message(chat_id=CHAT_ID, text=report)
+        for chunk in split_message(report):
+            await bot.send_message(chat_id=CHAT_ID, text=chunk)
         print(f"Sent OpenAI report to {CHAT_ID} at {datetime.now()}")
     except Exception as e:
         print(f"Failed to send OpenAI report: {e}")
@@ -253,8 +258,8 @@ scheduler = BlockingScheduler()
 # Schedule the OpenAI report at 10:00 AM
 scheduler.add_job(send_openai_report_sync, 'cron', hour=10, minute=0)
 
-# Schedule the OpenAI report at 17:00 PM
-scheduler.add_job(send_openai_report_17_00_sync, 'cron', hour=17, minute=0)
+# Schedule the OpenAI report at 17:18 PM
+scheduler.add_job(send_openai_report_17_00_sync, 'cron', hour=17, minute=18)
 
 if __name__ == '__main__':
     print('Bot started. Waiting to send scheduled messages...')
