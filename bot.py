@@ -7,6 +7,15 @@ from pathlib import Path
 import asyncio
 import openai
 import time
+import logging
+
+# Настройка логирования
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler()]
+)
+logging.info("Скрипт bot.py запущен.")
 
 # Always load .env from the script's directory
 load_dotenv(dotenv_path=Path(__file__).parent / '.env')
@@ -15,11 +24,20 @@ TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 CHAT_ID = os.getenv('CHAT_ID')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
-print(f"Loaded token: {TELEGRAM_BOT_TOKEN!r}")
-print(f"Loaded chat id: {CHAT_ID!r}")
-
-if not TELEGRAM_BOT_TOKEN or not CHAT_ID:
-    print("Error: TELEGRAM_BOT_TOKEN or CHAT_ID is not set. Please check your .env file.")
+if TELEGRAM_BOT_TOKEN:
+    logging.info("TELEGRAM_BOT_TOKEN успешно загружен.")
+else:
+    logging.warning("TELEGRAM_BOT_TOKEN не найден! Бот не сможет работать.")
+    exit(1)
+if CHAT_ID:
+    logging.info("CHAT_ID успешно загружен.")
+else:
+    logging.warning("CHAT_ID не найден! Бот не сможет работать.")
+    exit(1)
+if OPENAI_API_KEY:
+    logging.info("OPENAI_API_KEY успешно загружен.")
+else:
+    logging.warning("OPENAI_API_KEY не найден! Бот не сможет работать.")
     exit(1)
 
 bot = Bot(token=TELEGRAM_BOT_TOKEN)
@@ -264,12 +282,15 @@ scheduler.add_job(send_openai_report_sync, 'cron', hour=10, minute=0)
 scheduler.add_job(send_openai_report_17_00_sync, 'cron', hour=17, minute=50)
 
 if __name__ == '__main__':
-    print('Bot started. Waiting to send scheduled messages...')
+    logging.info('Bot started. Waiting to send scheduled messages...')
     scheduler.start()
     send_openai_report_17_00_sync()
-    print("Планировщик запущен. Бот в режиме ожидания...")
+    logging.info("Планировщик запущен. Бот в режиме ожидания...")
     try:
         while True:
-            time.sleep(3600)  # Sleep for an hour, or any interval you like
+            time.sleep(3600)
+            logging.debug("Основной цикл все еще работает...")
     except (KeyboardInterrupt, SystemExit):
-        scheduler.shutdown() 
+        if 'scheduler' in locals() and scheduler.running:
+            scheduler.shutdown()
+        logging.info("Бот остановлен.") 
