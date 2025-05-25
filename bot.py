@@ -277,10 +277,10 @@ def send_openai_report_17_00_sync():
         print(f"Failed to send OpenAI report: {e}")
 
 scheduler = BackgroundScheduler()
-# Schedule the OpenAI report at 10:00 AM
-scheduler.add_job(send_openai_report_sync, 'cron', hour=07, minute=0)
+# Schedule the OpenAI report at 07:00 AM
+scheduler.add_job(send_openai_report_sync, 'cron', hour=7, minute=0)
 
-# Schedule the OpenAI report at 17:00 PM
+# Schedule the OpenAI report at 14:00 PM
 scheduler.add_job(send_openai_report_17_00_sync, 'cron', hour=14, minute=0)
 
 if __name__ == '__main__':
