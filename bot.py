@@ -279,7 +279,7 @@ scheduler = BackgroundScheduler()
 scheduler.add_job(send_openai_report_sync, 'cron', hour=10, minute=0)
 
 # Schedule the OpenAI report at 17:00 PM
-scheduler.add_job(send_openai_report_17_00_sync, 'cron', hour=17, minute=12)
+scheduler.add_job(send_openai_report_17_00_sync, 'cron', hour=15, minute=19)
 
 if __name__ == '__main__':
     logging.info('Bot started. Waiting to send scheduled messages...')
