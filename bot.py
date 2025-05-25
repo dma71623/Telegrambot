@@ -1,11 +1,12 @@
 import os
 from telegram import Bot
-from apscheduler.schedulers.blocking import BlockingScheduler
+from apscheduler.schedulers.background import BackgroundScheduler
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from pathlib import Path
 import asyncio
 import openai
+import time
 
 # Always load .env from the script's directory
 load_dotenv(dotenv_path=Path(__file__).parent / '.env')
@@ -210,6 +211,7 @@ II. Перспективные акции для инвестирования:
 client = openai.OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
 def split_message(text, max_length=4096):
+    # Splits text into chunks no longer than max_length
     return [text[i:i+max_length] for i in range(0, len(text), max_length)]
 
 async def send_openai_report():
@@ -254,13 +256,20 @@ def send_openai_report_17_00_sync():
     except Exception as e:
         print(f"Failed to send OpenAI report: {e}")
 
-scheduler = BlockingScheduler()
+scheduler = BackgroundScheduler()
 # Schedule the OpenAI report at 10:00 AM
 scheduler.add_job(send_openai_report_sync, 'cron', hour=10, minute=0)
 
-# Schedule the OpenAI report at 17:18 PM
-scheduler.add_job(send_openai_report_17_00_sync, 'cron', hour=17, minute=18)
+# Schedule the OpenAI report at 17:00 PM
+scheduler.add_job(send_openai_report_17_00_sync, 'cron', hour=17, minute=50)
 
 if __name__ == '__main__':
     print('Bot started. Waiting to send scheduled messages...')
-    scheduler.start() 
+    scheduler.start()
+    send_openai_report_17_00_sync()
+    print("Планировщик запущен. Бот в режиме ожидания...")
+    try:
+        while True:
+            time.sleep(3600)  # Sleep for an hour, or any interval you like
+    except (KeyboardInterrupt, SystemExit):
+        scheduler.shutdown() 
